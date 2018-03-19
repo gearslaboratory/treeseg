@@ -1,7 +1,9 @@
-//Andrew Burt - a.burt@ucl.ac.uk
+//Andrew Burt - a.burt.12@ucl.ac.uk
 
 #include <fstream>
+
 #include <treeseg.hpp>
+
 #include <riegl/scanlib.hpp>
 
 struct pcloud 
@@ -61,45 +63,25 @@ int main(int argc,char** argv)
 		fname = name3[name3.size()-2]+"_"+name3[name3.size()-1]+".txt";
 		pcl::PointCloud<pcl::PointXYZ>::Ptr tree(new pcl::PointCloud<pcl::PointXYZ>);
 		reader.read(argv[i],*tree);
-
 		Eigen::Vector4f min,max;
-		pcl::getMinMax3D(*tree,min,max);	
-
-		pcl::PassThrough<pcl::PointXYZ> pass;
-
-		pcl::PointCloud<pcl::PointXYZ>::Ptr tmp(new pcl::PointCloud<pcl::PointXYZ>);
-		pass.setInputCloud(tree);
-		pass.setFilterFieldName("z");
-		pass.setFilterLimits(min[2]+1.2,min[2]+1.4);
-		pass.filter(*tmp);
-
-		pcl::getMinMax3D(*tmp,min,max);
-
-
-		x.push_back((max[0]+min[0])/2);
-		y.push_back((max[1]+min[1])/2);
-
-/*
-		Eigen::Vector4f min,max;
-		float res_const = resolution*0.9;
 		pcl::getMinMax3D(*tree,min,max);
 		pcl::PassThrough<pcl::PointXYZ> pass;
 		int c=0;
-		for(float xt=min[0]-res_const; xt<max[0]+res_const; xt+=resolution)
+		for(float xt=min[0]; xt<max[0]; xt+=resolution)
 		{
 			pcl::PointCloud<pcl::PointXYZ>::Ptr tmpx(new pcl::PointCloud<pcl::PointXYZ>);
 			pass.setInputCloud(tree);
 			pass.setFilterFieldName("x");
 			pass.setFilterLimits(xt,xt+resolution);
 			pass.filter(*tmpx);
-			for(float yt=min[1]-res_const; yt<max[1]+res_const; yt+=resolution)
+			for(float yt=min[1]; yt<max[1]; yt+=resolution)
 			{
 				pcl::PointCloud<pcl::PointXYZ>::Ptr tmpy(new pcl::PointCloud<pcl::PointXYZ>);
 				pass.setInputCloud(tmpx);
 				pass.setFilterFieldName("y");
 				pass.setFilterLimits(yt,yt+resolution);
 				pass.filter(*tmpy);
-				for(float zt=min[2]-res_const; zt<max[2]+res_const; zt+=resolution)
+				for(float zt=min[2]; zt<max[2]; zt+=resolution)
 				{
 					pcl::PointCloud<pcl::PointXYZ>::Ptr tmpz(new pcl::PointCloud<pcl::PointXYZ>);
 					pass.setInputCloud(tmpy);
@@ -116,11 +98,9 @@ int main(int argc,char** argv)
 				}
 			}
 		}
-*/
-		count.push_back(1);
+		count.push_back(c);
 		fnames.push_back(fname);
 	}
-
 	std::ofstream cloudfiles[fnames.size()];
 	for(int j=0;j<fnames.size();j++)
 	{
@@ -179,7 +159,7 @@ int main(int argc,char** argv)
 			rc->close();
 			ss.str("");
 			if(positions[k][7] == '0' && positions[k][8] == '0') ss << positions[k][9];
-			else if(positions[k][7] == '0') ss << positions[k][8] << positions[k][9];
+			else if(positions[k][8] == '0') ss << positions[k][8] << positions[k][9];
 			else ss << positions[k][7] << positions[k][8] << positions[k][9];
 			std::string scan_number = ss.str();
 			pc.scan_number = atof(scan_number.c_str());
@@ -205,22 +185,15 @@ int main(int argc,char** argv)
 					int pos = sum; 
 					int end = sum + count[n] - 1; 
 					sum += count[n];
-					for(int p=pos;p<=end;p++)
+					for(int p=pos;p<end;p++)
 					{
-					//	if(X >= x[p] && X <= x[p]+resolution)
-					//	{
-					//		if(Y >= y[p] && Y <= y[p]+resolution)
-					//		{
-					//			if(Z >= z[p] && Z <= z[p]+resolution)
-					//			{
-					
-						if(X >= x[p]-resolution/2 && X <= x[p]+resolution/2)
+						if(X >= x[p] && X <= x[p]+resolution)
 						{
-							if(Y >= y[p]-resolution/2 && Y <= y[p]+resolution/2)
-							{	
-								if(pc.deviation[m] <= 15)
+							if(Y >= y[p] && Y <= y[p]+resolution)
+							{
+								if(Z >= z[p] && Z <= z[p]+resolution)
 								{
-									cloudfiles[n] << X << " " << Y << " " << Z << std::endl;
+									cloudfiles[n] << X << " " << Y << " " << Z << " " << pc.range[m] << " " << pc.reflectance[m] << " " << pc.deviation[m] << " " << pc.return_number[m] << " " << pc.scan_number << std::endl;
 								}
 							}
 						}

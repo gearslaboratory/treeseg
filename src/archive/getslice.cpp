@@ -1,4 +1,4 @@
-//Andrew Burt - a.burt@ucl.ac.uk
+//Andrew Burt - a.burt.12@ucl.ac.uk
 
 #include <treeseg.hpp>
 
@@ -30,26 +30,19 @@ int main (int argc, char** argv)
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PCDReader reader;
 	pcl::PCDWriter writer;
-	for(int i=4;i<argc;i++)
-	{
-		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tmp(new pcl::PointCloud<pcl::PointXYZ>);
-		reader.read(argv[i],*cloud_tmp);
-		*cloud_in += *cloud_tmp;
-	}
+	reader.read(argv[4],*cloud_in);
 	std::string fname;
 	std::vector<std::string> name1;
 	std::vector<std::string> name2;
 	std::vector<std::string> name3;
 	boost::split(name1,argv[4],boost::is_any_of("."));
-	boost::split(name2,name1[name1.size()-3],boost::is_any_of("_"));
-	fname = name2[0];
+	fname = name1[name1.size()-3];
 	std::stringstream ss;
 	ss << fname << ".slice.downsample.pcd";
-	std::cout << ss.str() << std::endl;
 	Eigen::Vector4f min,max;
 	pcl::getMinMax3D(*cloud_in,min,max);
-	std::ofstream outfile("dem.txt");
-	outfile << resolution << " " << min[0] << " " << max[0] << " " << min[1] << " " << max[1] << std::endl;
+//	std::ofstream outfile("dem.txt");
+//	outfile << resolution << " " << min[0] << " " << max[0] << " " << min[1] << " " << max[1] << std::endl;
 	for(float x=min[0];x<=max[0];x+=resolution)
 	{
 		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_x(new pcl::PointCloud<pcl::PointXYZ>);
@@ -77,11 +70,11 @@ int main (int argc, char** argv)
 			passz.setFilterFieldName("z");
 			passz.setFilterLimits(min_s[2]+z_min,min_s[2]+z_max);
 			passz.filter(*cloud_z);
-			outfile << x << " " << y << " " << min_s[2] << std::endl;
+//			outfile << x << " " << y << " " << min_s[2] << std::endl;
 			*cloud_out += *cloud_z;
 		}
 	}
-	outfile.close();
+//	outfile.close();
 	writer.write(ss.str(),*cloud_out,true);
 	return 0;
 }

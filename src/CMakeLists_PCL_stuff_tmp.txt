@@ -1,0 +1,13 @@
+#Andrew Burt - a.burt.12@ucl.ac.uk
+
+cmake_minimum_required(VERSION 2.8)
+project(treeseg)
+
+#SET(CMAKE_CXX_FLAGS "-std=c++0x")
+find_package(PCL 1.7 REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS} /media/STORAGE1/Wytham/wytham_code/treeseg/include)
+link_directories(/media/STORAGE1/Wytham/wytham_code/treeseg/lib)
+
+add_executable(isolatetree isolatetree.cpp)
+target_link_libraries(isolatetree ${PCL_LIBRARIES})
+

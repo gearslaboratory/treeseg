@@ -1,0 +1,20 @@
+treeseg log
+---------------
+
+Andrew Burt
+a.burt.12@ucl.ac.uk
+01/05/2015
+
+---------------
+
+To-do:
+	downsample should work out integer overflow - not the user
+	getstems needs to use dem rather than horizontal assumption
+	port to C (long-term objective removing all dependancies)
+	take library approach (long-term objective instead of multiple binaries)
+
+---------------
+
+v0 (01/05/2015):
+	Fork of vegetationextraction v0.4.3
+
