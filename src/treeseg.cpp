@@ -1,4 +1,3 @@
-/*
 * treeseg.cpp
 *
 * MIT License
