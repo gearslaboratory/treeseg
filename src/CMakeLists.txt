@@ -61,3 +61,7 @@ target_link_libraries(pcd2xyz ${PCL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(sepwoodleaf sepwoodleaf.cpp)
 target_link_libraries(sepwoodleaf treeseg leafsep ${PCL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
+# Old getslice:
+add_executable(getslice getslice.cpp)
+target_link_libraries(getslice ${PCL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
