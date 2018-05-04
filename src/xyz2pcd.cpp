@@ -30,7 +30,7 @@ int main (int argc, char* argv[])
 			cloud->insert(cloud->end(),point);
 		}
 		infile.close();
-		writer.write(ss.str(),*cloud,true);
+		writer.write(ss.str(),*cloud,false);
 	}
 	return 0;
 }

@@ -130,7 +130,7 @@ int main (int argc, char *argv[])
 	{
 		ss.str("");
 		ss << "cluster_" << m << ".pcd";
-		writer.write(ss.str(),*stems[m],true);
+		writer.write(ss.str(),*stems[m],false);
 	}
 	std::cout << ss.str() << " | " << stems.size() << std::endl;
 	//

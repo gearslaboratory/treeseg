@@ -31,8 +31,8 @@ int main (int argc, char *argv[])
 			std::vector<std::string> id = getFileID(argv[i]);
 			downsample(original,edgelength,filtered);
 			ss.str("");
-			ss << id[1] << "_" << id[0] << ".downsample.pcd"; 
-			writer.write(ss.str(),*filtered,true);
+			ss << id[1] << ".pcd" << id[0] << ".downsample.pcd";
+			writer.write(ss.str(),*filtered,false);
 			original->clear();	
 			filtered->clear();
 		}
@@ -44,7 +44,7 @@ int main (int argc, char *argv[])
 		ss.str("");
 		ss << id[1] << ".downsample.pcd";
 		std::cout << "Writing downsamples plotcloud..." << std::endl;
-		writer.write(ss.str(),*filtered,true);
+		writer.write(ss.str(),*filtered,false);
 	}
 	return 0;
 }

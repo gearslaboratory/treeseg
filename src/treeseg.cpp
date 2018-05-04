@@ -382,7 +382,7 @@ void writeClouds(std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> clouds, std::s
 			out->insert(out->end(),point);
 		}
 	}
-	writer.write(fname,*out,true);
+	writer.write(fname,*out,false);
 }
 
 std::vector<float> fitCircle(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, int nnearest)

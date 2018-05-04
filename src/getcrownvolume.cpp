@@ -67,7 +67,7 @@ int main (int argc, char** argv)
 		*volume += *zslice;
 		std::stringstream ss;
 		ss << "volume_" << id[0] << ".pcd";
-		writer.write(ss.str(),*volume,true);	
+		writer.write(ss.str(),*volume,false);
 		std::cout << ss.str() << std::endl;
 	}
 	return 0;

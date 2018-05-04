@@ -226,7 +226,7 @@ void writeCloudClassifiedByPoint(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, std
 		point.b = colours[classifications[j]][2];
 		out->insert(out->end(),point);
 	}
-	writer.write(fname,*out,true);
+	writer.write(fname,*out,false);
 }
 
 void writeCloudClassifiedByCluster(std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> &clouds, std::vector<int> &classifications, std::string fname)
@@ -257,5 +257,5 @@ void writeCloudClassifiedByCluster(std::vector<pcl::PointCloud<pcl::PointXYZ>::P
 			out->insert(out->end(),point);
 		}
 	}	
-	writer.write(fname,*out,true);
+	writer.write(fname,*out,false);
 }

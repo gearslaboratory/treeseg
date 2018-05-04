@@ -35,8 +35,8 @@ int main (int argc, char* argv[])
 	classifications = classifyGmmClusterModel(regions,n_gaus,featmatrix,model);
 	std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> clouds;
 	separateCloudsClassifiedByCluster(regions,classifications,clouds);
-	writer.write("cc1.pcd",*clouds[0],true);
-	writer.write("cc2.pcd",*clouds[1],true);
+	writer.write("cc1.pcd",*clouds[0],false);
+	writer.write("cc2.pcd",*clouds[1],false);
 	//by point
 	arma::mat pfeatmat;
 	arma::gmm_diag pmodel;
@@ -45,14 +45,14 @@ int main (int argc, char* argv[])
 	pclassifications = classifyGmmPointModel(clouds[1],n_gaus,pfeatmat,pmodel);
 	std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> pclouds;
 	separateCloudsClassifiedByPoint(clouds[1],pclassifications,pclouds);
-	writer.write("pc1.pcd",*pclouds[0],true);
-	writer.write("pc2.pcd",*pclouds[1],true);
+	writer.write("pc1.pcd",*pclouds[0],false);
+	writer.write("pc2.pcd",*pclouds[1],false);
 	//write clouds
 	pcl::PointCloud<pcl::PointXYZ>::Ptr wood(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr leaf(new pcl::PointCloud<pcl::PointXYZ>);
 	*wood += *clouds[0] + *pclouds[0];
 	*leaf += *clouds[1] + *pclouds[1];
-	writer.write("wood.pcd",*wood,true);
-	writer.write("leaf.pcd",*leaf,true);
+	writer.write("wood.pcd",*wood,false);
+	writer.write("leaf.pcd",*leaf,false);
 	return 0;
 }

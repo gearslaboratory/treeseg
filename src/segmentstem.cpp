@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 		spatial3DCylinderFilter(plot,cyl,volume);
 		ss.str("");
 		ss << "cylinder_" << id[0] << ".pcd";
-		writer.write(ss.str(),*volume,true);
+		writer.write(ss.str(),*volume,false);
 		std::cout << ss.str() << std::endl;
 		//
 		std::cout << "Segmenting ground returns: " << std::flush;
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 		*vnoground += *top;
 		ss.str("");
 		ss << "cylinder_noground_" << id[0] << ".pcd";
-		writer.write(ss.str(),*vnoground,true);
+		writer.write(ss.str(),*vnoground,false);
 		std::cout << ss.str() << std::endl;
 		//
 		std::cout << "Euclidean clustering: " << std::flush;
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
 		correctStem(regions[idx],nnearest,zstart,zdelta,stepcovmax,radchangemin,stem);
 		ss.str("");
 		ss << "stem_" << id[0] << ".pcd";
-		writer.write(ss.str(),*stem,true);
+		writer.write(ss.str(),*stem,false);
 		std::cout << ss.str() << std::endl;
 	}
 	return 0;

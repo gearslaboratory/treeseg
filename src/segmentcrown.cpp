@@ -80,7 +80,7 @@ int main (int argc, char* argv[])
 		ss << "ec_rg_rlw_plw_w_" << id[0] << ".pcd";
 		pcl::PointCloud<pcl::PointXYZ>::Ptr wood(new pcl::PointCloud<pcl::PointXYZ>);
 		*wood += *csepclouds[0] + *psepclouds[0];
-		writer.write(ss.str(),*wood,true);
+		writer.write(ss.str(),*wood,false);
 		std::cout << ss.str() << std::endl;
 		//
 		std::cout << "Re-segmenting regions: " << std::flush;
@@ -103,7 +103,7 @@ int main (int argc, char* argv[])
 		buildTree(regions,tree);
 		ss.str("");
 		ss << "tree_" << id[0] << ".pcd";
-		writer.write(ss.str(),*tree,true);
+		writer.write(ss.str(),*tree,false);
 		std::cout << ss.str() << std::endl;
 	}
 	return 0;

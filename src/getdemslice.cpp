@@ -30,6 +30,6 @@ int main (int argc, char *argv[])
 	dem = getDemAndSlice(plotcloud,resolution,zmin,zmax,slice);
 	for(int j=0;j<dem.size();j++) std::cout << dem[j][0] << " " << dem[j][1] << " " << dem[j][2] << std::endl;
 	std::cout << "Writing slice..." << std::endl;
-	writer.write(ss.str(),*slice,true);
+	writer.write(ss.str(),*slice,false);
 	return 0;
 }
