@@ -1,4 +1,4 @@
-//Andrew Burt - a.burt@ucl.ac.uk
+//Andrew Burt - a.burt.12@ucl.ac.uk
 
 #include <iostream>
 #include <sstream>

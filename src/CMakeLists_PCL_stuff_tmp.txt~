@@ -8,7 +8,6 @@ find_package(PCL 1.7 REQUIRED)
 include_directories(${PCL_INCLUDE_DIRS} /media/STORAGE1/Wytham/wytham_code/treeseg/include)
 link_directories(/media/STORAGE1/Wytham/wytham_code/treeseg/lib)
 
-
-add_executable(pcd_tree_centre pcd_tree_centre.cpp)
-target_link_libraries(pcd_tree_centre ${PCL_LIBRARIES})
+add_executable(mergeclusters_noReclustering2 mergeclusters_noReclustering2.cpp)
+target_link_libraries(mergeclusters_noReclustering2 ${PCL_LIBRARIES})
 

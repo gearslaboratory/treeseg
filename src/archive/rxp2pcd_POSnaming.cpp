@@ -1,8 +1,12 @@
 //Andrew Burt - a.burt.12@ucl.ac.uk
 
+#include <string>
+#include <sstream>
 #include <fstream>
+#include <cstdlib>
+#include <vector>
 
-#include <treeseg.hpp>
+#include <dirent.h>
 
 #include <riegl/scanlib.hpp>
 
@@ -46,72 +50,85 @@ int main(int argc,char** argv)
 {
 	std::string top_dir = argv[1];
 	if(top_dir[top_dir.length()-1] != '/') top_dir = top_dir + "/";
-	float resolution = atof(argv[2]);
-	pcl::PCDReader reader;
-	std::vector<std::string> fnames;
-	std::vector<int> count;
-	std::vector<float> x,y,z;
-	for(int i=3;i<argc;i++)
+	std::ifstream cfile;
+	cfile.open(argv[2]);
+	float coordfile[4];
+	int no_count = 0;
+	if(cfile.is_open())
 	{
-		std::string fname;
-		std::vector<std::string> name1;
-		std::vector<std::string> name2;
-		std::vector<std::string> name3;
-		boost::split(name1,argv[i],boost::is_any_of("."));
-		boost::split(name2,name1[name1.size()-2],boost::is_any_of("/"));
-		boost::split(name3,name2[name2.size()-1],boost::is_any_of("_"));
-		fname = name3[name3.size()-2]+"_"+name3[name3.size()-1]+".txt";
-		pcl::PointCloud<pcl::PointXYZ>::Ptr tree(new pcl::PointCloud<pcl::PointXYZ>);
-		reader.read(argv[i],*tree);
-		Eigen::Vector4f min,max;
-		pcl::getMinMax3D(*tree,min,max);
-		pcl::PassThrough<pcl::PointXYZ> pass;
-		int c=0;
-		for(float xt=min[0]; xt<max[0]; xt+=resolution)
+		while(!cfile.eof())
 		{
-			pcl::PointCloud<pcl::PointXYZ>::Ptr tmpx(new pcl::PointCloud<pcl::PointXYZ>);
-			pass.setInputCloud(tree);
-			pass.setFilterFieldName("x");
-			pass.setFilterLimits(xt,xt+resolution);
-			pass.filter(*tmpx);
-			for(float yt=min[1]; yt<max[1]; yt+=resolution)
-			{
-				pcl::PointCloud<pcl::PointXYZ>::Ptr tmpy(new pcl::PointCloud<pcl::PointXYZ>);
-				pass.setInputCloud(tmpx);
-				pass.setFilterFieldName("y");
-				pass.setFilterLimits(yt,yt+resolution);
-				pass.filter(*tmpy);
-				for(float zt=min[2]; zt<max[2]; zt+=resolution)
-				{
-					pcl::PointCloud<pcl::PointXYZ>::Ptr tmpz(new pcl::PointCloud<pcl::PointXYZ>);
-					pass.setInputCloud(tmpy);
-					pass.setFilterFieldName("z");
-					pass.setFilterLimits(zt,zt+resolution);
-					pass.filter(*tmpz);
-					if(tmpz->points.size() != 0)
-					{
-						x.push_back(xt);
-						y.push_back(yt);
-						z.push_back(zt);
-						c++;		
-					}
-				}
-			}
+			cfile >> coordfile[no_count];
+			no_count++;
 		}
-		count.push_back(c);
-		fnames.push_back(fname);
 	}
-	std::ofstream cloudfiles[fnames.size()];
-	for(int j=0;j<fnames.size();j++)
+	cfile.close();
+	float x_min = coordfile[0]-25;
+	float x_max = coordfile[1]+25;
+	float y_min = coordfile[2]-25;
+	float y_max = coordfile[3]+25;
+	std::cout << x_min << " " << x_max << " " << y_min << " " << y_max << std::endl;
+	int steps = atoi(argv[3])+1; //+1 is sample pcd for nearestneighbour etc
+	float deviation_max = atof(argv[4]);
+	std::string fname = argv[5];
+	float coords[steps][4];
+	int count[steps];
+	float delta_x = (x_max - x_min) / float(steps);
+	std::cout << delta_x << std::endl;
+	for(int i=0;i<steps;i++)
 	{
-		cloudfiles[j].open(fnames[j]);
-		cloudfiles[j].precision(3);
-		cloudfiles[j].setf(std::ios::fixed);
+		if(i == steps-1)
+		{
+			float x_mid = (x_max+x_min)/2;
+			float y_mid = (y_max+y_min)/2;
+			coords[i][0] = x_mid - 15;
+			coords[i][1] = x_mid + 15;
+			coords[i][2] = y_mid - 15;
+			coords[i][3] = y_mid + 15;
+			std::cout << "sample " << coords[i][0] << " " << coords[i][1] << " " << coords[i][2] << " " << coords[i][3] << std::endl;
+		}
+		else
+		{
+			coords[i][0] = x_min + (i * delta_x);
+			coords[i][1] = x_min + ((i + 1) * delta_x);
+			coords[i][2] = y_min;
+			coords[i][3] = y_max;
+			std::cout << i << " " << coords[i][0] << " " << coords[i][1] << " " << coords[i][2] << " " << coords[i][3] << std::endl;
+		}
+		//initialise count array
+		count[i] = 0;
 	}
 	std::stringstream ss;
+	std::ofstream xyzfiles[steps];
+	std::string xyznames[steps];
+	std::string pcdnames[steps];
+	for(int j=0;j<steps;j++)
+	{
+		if(j == steps-1)
+		{
+			ss.str("");
+			ss << fname << ".sample.xyz";
+			xyzfiles[j].open(ss.str(),std::ios::binary);
+			xyznames[j] = ss.str();
+			ss.str("");
+			ss << fname << ".sample.pcd";
+			pcdnames[j] = ss.str();
+
+		}
+		else
+		{
+			ss.str("");
+			ss << fname << "_" << j << ".xyz";
+			xyzfiles[j].open(ss.str(),std::ios::binary);
+			xyznames[j] = ss.str();
+			ss.str("");
+			ss << fname << "_" << j << ".pcd";
+			pcdnames[j] = ss.str();
+		}
+	}
 	std::vector<std::string> positions;
 	DIR *tdir = NULL;
-	tdir = opendir(top_dir.c_str());
+	tdir = opendir (top_dir.c_str());
 	struct dirent *tent = NULL;
 	while(tent = readdir(tdir)) positions.push_back(tent->d_name);
 	closedir(tdir);
@@ -179,22 +196,18 @@ int main(int argc,char** argv)
 				float X = ((pc.x[m]*pc.matrix[0])+(pc.y[m]*pc.matrix[1])+(pc.z[m]*pc.matrix[2]))+pc.matrix[3];
 				float Y = ((pc.x[m]*pc.matrix[4])+(pc.y[m]*pc.matrix[5])+(pc.z[m]*pc.matrix[6]))+pc.matrix[7];
 				float Z = ((pc.x[m]*pc.matrix[8])+(pc.y[m]*pc.matrix[9])+(pc.z[m]*pc.matrix[10]))+pc.matrix[11];
-				int sum = 0;
-				for(int n=0;n<fnames.size();n++)
+				for(int n=0;n<steps;n++)
 				{
-					int pos = sum; 
-					int end = sum + count[n] - 1; 
-					sum += count[n];
-					for(int p=pos;p<end;p++)
+					if(X > coords[n][0] && X < coords[n][1])
 					{
-						if(X >= x[p] && X <= x[p]+resolution)
+						if(Y > coords[n][2] && Y < coords[n][3])
 						{
-							if(Y >= y[p] && Y <= y[p]+resolution)
+							if(pc.deviation[m] <= deviation_max)
 							{
-								if(Z >= z[p] && Z <= z[p]+resolution)
-								{
-									cloudfiles[n] << X << " " << Y << " " << Z << " " << pc.range[m] << " " << pc.reflectance[m] << " " << pc.deviation[m] << " " << pc.return_number[m] << " " << pc.scan_number << std::endl;
-								}
+								xyzfiles[n].write(reinterpret_cast<const char*>(&X),sizeof(X));
+								xyzfiles[n].write(reinterpret_cast<const char*>(&Y),sizeof(Y));
+								xyzfiles[n].write(reinterpret_cast<const char*>(&Z),sizeof(Z));
+								count[n] += 1;
 							}
 						}
 					}
@@ -202,6 +215,22 @@ int main(int argc,char** argv)
 			}
 		}
 	}
-	for(int q=0;q<fnames.size();q++) cloudfiles[q].close();
+	for(int p=0;p<steps;p++)
+	{
+		xyzfiles[p].close();
+	}
+	for(int q=0;q<steps;q++)
+	{
+		std::ofstream headerstream("header.tmp");
+		headerstream << "VERSION 0.7" << std::endl << "FIELDS x y z" << std::endl << "SIZE 4 4 4" << std::endl << "TYPE F F F" << std::endl << "COUNT 1 1 1" << std::endl << "WIDTH " << count[q] << std::endl << "HEIGHT 1" << std::endl << "VIEWPOINT 0 0 0 1 0 0 0" << std::endl << "POINTS " << count[q] << std::endl << "DATA binary" << std::endl;
+		headerstream.close();
+		ss.str("");
+		ss << "cat header.tmp " << xyznames[q] << " > " << pcdnames[q] << "; rm header.tmp " << xyznames[q];
+		std::string string;
+		const char* cc;
+		string = ss.str();
+		cc = string.c_str();
+		system(cc);
+	}
 	return 0;
 }

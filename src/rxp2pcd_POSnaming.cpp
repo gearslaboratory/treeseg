@@ -5,6 +5,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <vector>
+#include <cmath>
 
 #include <dirent.h>
 
@@ -67,44 +68,37 @@ int main(int argc,char** argv)
 	float x_max = coordfile[1]+25;
 	float y_min = coordfile[2]-25;
 	float y_max = coordfile[3]+25;
-	std::cout << x_min << " " << x_max << " " << y_min << " " << y_max << std::endl;
-	int steps = atoi(argv[3])+1; //+1 is sample pcd for nearestneighbour etc
+	float area = atof(argv[3]);
+	int length = ceil((x_max-x_min)/sqrt(area)) * ceil((y_max-y_min)/sqrt(area)) + 1;
+	float coords[length][4];
+	int c = 0;
+	int count[length];
+	for(float x=x_min;x<x_max;x+=sqrt(area))
+	{
+		for(float y=y_min;y<y_max;y+=sqrt(area))
+		{
+			coords[c][0] = x;
+			coords[c][1] = x+sqrt(area);
+			coords[c][2] = y;
+			coords[c][3] = y+sqrt(area);
+			count[c] = 0;
+			c++;
+		}
+	}
+	coords[length-1][0] = (x_max + x_min) / 2 - 15;
+	coords[length-1][1] = (x_max + x_min) / 2 + 15;
+	coords[length-1][2] = (y_max + y_min) / 2 - 15;
+	coords[length-1][3] = (y_max + y_min) / 2 + 15;
+	count[length-1] = 0;
 	float deviation_max = atof(argv[4]);
 	std::string fname = argv[5];
-	float coords[steps][4];
-	int count[steps];
-	float delta_x = (x_max - x_min) / float(steps);
-	std::cout << delta_x << std::endl;
-	for(int i=0;i<steps;i++)
-	{
-		if(i == steps-1)
-		{
-			float x_mid = (x_max+x_min)/2;
-			float y_mid = (y_max+y_min)/2;
-			coords[i][0] = x_mid - 15;
-			coords[i][1] = x_mid + 15;
-			coords[i][2] = y_mid - 15;
-			coords[i][3] = y_mid + 15;
-			std::cout << "sample " << coords[i][0] << " " << coords[i][1] << " " << coords[i][2] << " " << coords[i][3] << std::endl;
-		}
-		else
-		{
-			coords[i][0] = x_min + (i * delta_x);
-			coords[i][1] = x_min + ((i + 1) * delta_x);
-			coords[i][2] = y_min;
-			coords[i][3] = y_max;
-			std::cout << i << " " << coords[i][0] << " " << coords[i][1] << " " << coords[i][2] << " " << coords[i][3] << std::endl;
-		}
-		//initialise count array
-		count[i] = 0;
-	}
 	std::stringstream ss;
-	std::ofstream xyzfiles[steps];
-	std::string xyznames[steps];
-	std::string pcdnames[steps];
-	for(int j=0;j<steps;j++)
+	std::ofstream xyzfiles[length];
+	std::string xyznames[length];
+	std::string pcdnames[length];
+	for(int j=0;j<length;j++)
 	{
-		if(j == steps-1)
+		if(j == length-1)
 		{
 			ss.str("");
 			ss << fname << ".sample.xyz";
@@ -113,7 +107,6 @@ int main(int argc,char** argv)
 			ss.str("");
 			ss << fname << ".sample.pcd";
 			pcdnames[j] = ss.str();
-
 		}
 		else
 		{
@@ -134,7 +127,7 @@ int main(int argc,char** argv)
 	closedir(tdir);
 	for(int k=0;k<positions.size();k++)
 	{
-		if(positions[k][0] == 'T') // This means: look for folders that start with T: i.e. the ones that have the rxp data
+		if(positions[k][0] == 'S' && positions[k][4] == 'P')
 		{
 			ss.str("");
 			ss << top_dir << positions[k];
@@ -151,7 +144,7 @@ int main(int argc,char** argv)
 			std::string rxpname;
 			for(int l=0;l<position_contents.size();l++)
 			{
-				if(position_contents[l][14] == 'r' && position_contents[l][15] == 'x' && position_contents[l][16] == 'p' && position_contents[l].length() == 17 ) //this should work for any standard rxp filename
+				if(position_contents[l][14] == 'r' && position_contents[l][15] == 'x' && position_contents[l][16] == 'p' && position_contents[l].length() == 17 )
 				{
 					ss.str("");
 					ss << top_dir << positions[k] << "/" << position_contents[l];
@@ -159,25 +152,35 @@ int main(int argc,char** argv)
 				}
 			}
 			ss.str("");
-			ss << top_dir << "matrix/" << "T" << positions[k][1] << positions[k][2] << positions[k][3] <<".DAT"; //the 3 digits going with the SOP that should start with T. So e.g. T001.DAT, T099.DAT, T125.DAT
+			ss << top_dir << "matrix/" << positions[k][7] << positions[k][8] << positions[k][9] <<".dat";
 			std::string matrixname = ss.str();
 			std::cout << rxpname << " " << " " << matrixname << std::endl;
-			std::shared_ptr<scanlib::basic_rconnection> rc;
-			rc = scanlib::basic_rconnection::create(rxpname);
-			rc->open();
-			scanlib::decoder_rxpmarker dec(rc);
+///////
 			pcloud pc;
-			importer imp(pc);
-			scanlib::buffer buf;
-			for(dec.get(buf);!dec.eoi();dec.get(buf))
+			try
 			{
-				imp.dispatch(buf.begin(), buf.end());
+
+				std::shared_ptr<scanlib::basic_rconnection> rc;
+				rc = scanlib::basic_rconnection::create(rxpname);
+				rc->open();
+				scanlib::decoder_rxpmarker dec(rc);
+				importer imp(pc);
+				scanlib::buffer buf;
+				for(dec.get(buf);!dec.eoi();dec.get(buf))
+				{
+					imp.dispatch(buf.begin(), buf.end());
+				}
+				rc->close();
 			}
-			rc->close();
+			catch (...)
+			{
+				continue;
+			}
+///////
 			ss.str("");
-			if(positions[k][1] == '0' && positions[k][2] == '0') ss << positions[k][3]; // line 178 (this line) - 182: this just attributes a variable scan number, so any point in the pcd point clouds can be tracked to a specific scan location
-			else if(positions[k][1] == '0') ss << positions[k][2] << positions[k][3];
-			else ss << positions[k][1] << positions[k][2] << positions[k][3];
+			if(positions[k][7] == '0' && positions[k][8] == '0') ss << positions[k][9];
+			else if(positions[k][7] == '0') ss << positions[k][8] << positions[k][9];
+			else ss << positions[k][7] << positions[k][8] << positions[k][9];
 			std::string scan_number = ss.str();
 			pc.scan_number = atof(scan_number.c_str());
 			std::ifstream mfile;
@@ -196,11 +199,11 @@ int main(int argc,char** argv)
 				float X = ((pc.x[m]*pc.matrix[0])+(pc.y[m]*pc.matrix[1])+(pc.z[m]*pc.matrix[2]))+pc.matrix[3];
 				float Y = ((pc.x[m]*pc.matrix[4])+(pc.y[m]*pc.matrix[5])+(pc.z[m]*pc.matrix[6]))+pc.matrix[7];
 				float Z = ((pc.x[m]*pc.matrix[8])+(pc.y[m]*pc.matrix[9])+(pc.z[m]*pc.matrix[10]))+pc.matrix[11];
-				for(int n=0;n<steps;n++)
+				for(int n=0;n<length;n++)
 				{
-					if(X > coords[n][0] && X < coords[n][1])
+					if(X >= coords[n][0] && X < coords[n][1])
 					{
-						if(Y > coords[n][2] && Y < coords[n][3])
+						if(Y >=coords[n][2] && Y < coords[n][3])
 						{
 							if(pc.deviation[m] <= deviation_max)
 							{
@@ -215,11 +218,11 @@ int main(int argc,char** argv)
 			}
 		}
 	}
-	for(int p=0;p<steps;p++)
+	for(int p=0;p<length;p++)
 	{
 		xyzfiles[p].close();
 	}
-	for(int q=0;q<steps;q++)
+	for(int q=0;q<length;q++)
 	{
 		std::ofstream headerstream("header.tmp");
 		headerstream << "VERSION 0.7" << std::endl << "FIELDS x y z" << std::endl << "SIZE 4 4 4" << std::endl << "TYPE F F F" << std::endl << "COUNT 1 1 1" << std::endl << "WIDTH " << count[q] << std::endl << "HEIGHT 1" << std::endl << "VIEWPOINT 0 0 0 1 0 0 0" << std::endl << "POINTS " << count[q] << std::endl << "DATA binary" << std::endl;

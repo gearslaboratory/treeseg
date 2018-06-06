@@ -1,9 +1,7 @@
 //Andrew Burt - a.burt.12@ucl.ac.uk
 
 #include <fstream>
-
 #include <treeseg.hpp>
-
 #include <riegl/scanlib.hpp>
 
 struct pcloud 
@@ -159,7 +157,7 @@ int main(int argc,char** argv)
 			rc->close();
 			ss.str("");
 			if(positions[k][7] == '0' && positions[k][8] == '0') ss << positions[k][9];
-			else if(positions[k][8] == '0') ss << positions[k][8] << positions[k][9];
+			else if(positions[k][7] == '0') ss << positions[k][8] << positions[k][9];
 			else ss << positions[k][7] << positions[k][8] << positions[k][9];
 			std::string scan_number = ss.str();
 			pc.scan_number = atof(scan_number.c_str());

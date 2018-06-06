@@ -1,4 +1,4 @@
-//Andrew Burt - a.burt@ucl.ac.uk
+//Andrew Burt - a.burt.12@ucl.ac.uk
 
 #include <string>
 #include <sstream>
@@ -127,7 +127,7 @@ int main(int argc,char** argv)
 	closedir(tdir);
 	for(int k=0;k<positions.size();k++)
 	{
-		if(positions[k][0] == 'S' && positions[k][4] == 'P')
+		if(positions[k][0] == 'T') // This means: look for folders that start with T: i.e. the ones that have the rxp data
 		{
 			ss.str("");
 			ss << top_dir << positions[k];
@@ -144,7 +144,7 @@ int main(int argc,char** argv)
 			std::string rxpname;
 			for(int l=0;l<position_contents.size();l++)
 			{
-				if(position_contents[l][14] == 'r' && position_contents[l][15] == 'x' && position_contents[l][16] == 'p' && position_contents[l].length() == 17 )
+				if(position_contents[l][14] == 'r' && position_contents[l][15] == 'x' && position_contents[l][16] == 'p' && position_contents[l].length() == 17 ) //this should work for any standard rxp filename
 				{
 					ss.str("");
 					ss << top_dir << positions[k] << "/" << position_contents[l];
@@ -152,9 +152,10 @@ int main(int argc,char** argv)
 				}
 			}
 			ss.str("");
-			ss << top_dir << "matrix/" << positions[k][7] << positions[k][8] << positions[k][9] <<".dat";
+			ss << top_dir << "matrix/" << "T" << positions[k][1] << positions[k][2] << positions[k][3] <<".DAT"; //the 3 digits going with the SOP that should start with T. So e.g. T001.DAT, T099.DAT, T125.DAT
 			std::string matrixname = ss.str();
 			std::cout << rxpname << " " << " " << matrixname << std::endl;
+///////
 			pcloud pc;
 			try
 			{
@@ -171,14 +172,15 @@ int main(int argc,char** argv)
 				}
 				rc->close();
 			}
-			catch(...)
+			catch (...)
 			{
 				continue;
 			}
+///////
 			ss.str("");
-			if(positions[k][7] == '0' && positions[k][8] == '0') ss << positions[k][9];
-			else if(positions[k][7] == '0') ss << positions[k][8] << positions[k][9];
-			else ss << positions[k][7] << positions[k][8] << positions[k][9];
+			if(positions[k][1] == '0' && positions[k][2] == '0') ss << positions[k][3]; // line 178 (this line) - 182: this just attributes a variable scan number, so any point in the pcd point clouds can be tracked to a specific scan location
+			else if(positions[k][1] == '0') ss << positions[k][2] << positions[k][3];
+			else ss << positions[k][1] << positions[k][2] << positions[k][3];
 			std::string scan_number = ss.str();
 			pc.scan_number = atof(scan_number.c_str());
 			std::ifstream mfile;

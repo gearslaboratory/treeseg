@@ -1,0 +1,57 @@
+#Andrew Burt - a.burt.12@ucl.ac.uk
+
+cmake_minimum_required(VERSION 2.8)
+project(treeseg)
+
+#SET(CMAKE_CXX_FLAGS "-std=c++0x")
+find_package(PCL 1.7 REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS} /media/STORAGE1/Wytham/wytham_code/treeseg/include)
+link_directories(/media/STORAGE1/Wytham/wytham_code/treeseg/lib)
+
+add_executable(segmentstems segmentstems.cpp)
+target_link_libraries(segmentstems ${PCL_LIBRARIES})
+
+add_executable(segmentstems_felipe segmentstems_felipe.cpp)
+target_link_libraries(segmentstems_felipe ${PCL_LIBRARIES})
+
+add_executable(getslice getslice.cpp)
+target_link_libraries(getslice ${PCL_LIBRARIES})
+
+add_executable(cloudresults cloudresults.cpp)
+target_link_libraries(cloudresults ${PCL_LIBRARIES})
+
+add_executable(downsample downsample.cpp)
+target_link_libraries(downsample ${PCL_LIBRARIES})
+
+add_executable(mergeclusters mergeclusters.cpp)
+target_link_libraries(mergeclusters ${PCL_LIBRARIES})
+
+add_executable(mergeclusters_noReclustering mergeclusters_noReclustering.cpp)
+target_link_libraries(mergeclusters_noReclustering ${PCL_LIBRARIES})
+
+add_executable(getclusters getclusters.cpp)
+target_link_libraries(getclusters ${PCL_LIBRARIES})
+
+add_executable(pcd_centre pcd_centre.cpp)
+target_link_libraries(pcd_centre ${PCL_LIBRARIES})
+
+add_executable(getclusters_original getclusters_original.cpp)
+target_link_libraries(getclusters_original ${PCL_LIBRARIES})
+
+add_executable(isolatetree isolatetree.cpp)
+target_link_libraries(isolatetree ${PCL_LIBRARIES})
+
+add_executable(nearestneighbour nearestneighbour.cpp)
+target_link_libraries(nearestneighbour ${PCL_LIBRARIES})
+
+add_executable(pcdASCII2binary pcdASCII2binary.cpp)
+target_link_libraries(pcdASCII2binary ${PCL_LIBRARIES})
+
+add_executable(pcdbinary2ASCII pcdbinary2ASCII.cpp)
+target_link_libraries(pcdbinary2ASCII ${PCL_LIBRARIES})
+
+add_executable(pruneleaves pruneleaves.cpp)
+target_link_libraries(pruneleaves ${PCL_LIBRARIES})
+
+add_executable(find_tiles find_tiles.cpp)
+target_link_libraries(find_tiles ${PCL_LIBRARIES})
