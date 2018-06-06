@@ -44,7 +44,7 @@ int main (int argc, char *argv[])
 		ss.str("");
 		ss << id[1] << ".downsample.pcd";
 		std::cout << "Writing downsamples plotcloud..." << std::endl;
-		writer.write(ss.str(),*filtered,false);
+		writer.writeASCII(ss.str(),*filtered,32);
 	}
 	return 0;
 }
