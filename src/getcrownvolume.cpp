@@ -20,7 +20,7 @@ float maxcrown(float dbh)
 {
 	//m    -> 29.40 * dbh ^ 0.6524
 	//ci_u -> 30.36 * dbh ^ 0.6931
-	float extent = 30.36 * pow(dbh,0.6931) + 0;
+	float extent = 30.36 * pow(dbh,0.6931) + 2.5;
 	return extent;
 }
 
@@ -62,7 +62,8 @@ int main (int argc, char** argv)
 		pcl::compute3DCentroid(*stem,centroid);
 		spatial1DFilter(plot,"x",centroid[0]-c/2,centroid[0]+c/2,xslice);
 		spatial1DFilter(xslice,"y",centroid[1]-c/2,centroid[1]+c/2,yslice);
-		spatial1DFilter(yslice,"z",max[2],min[2]+h,zslice);
+//		spatial1DFilter(yslice,"z",max[2],min[2]+h,zslice);
+		spatial1DFilter(yslice,"z",(max[2]-min[2]),min[2]+h,zslice); // crown goes to ground.
 		*volume += *stem;
 		*volume += *zslice;
 		std::stringstream ss;
