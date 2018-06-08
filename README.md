@@ -119,8 +119,23 @@ LEAF_SIZE="0.04"
 
 # TODO: OTHER PARAMETERS:
 
+### Step 1, prepare the data ###
+# 1a. Convert to PCD and downsample.
+# First, lets name our output file:
+DOWNSAMPLE_FILE=$LASBASE"_downsample.pcd"
 
-
+# Now, we'll convert and downsample in the same step using pdal translate:
+singularity exec $SINGULARITY_PULLFOLDER/gearslaboratory-gears-singularity-master-gears-pdal.simg \ # 
+pdal translate \ # The translation algorithm
+	-v 4 \ # Verbose mode
+	--writers.pcd.xyz=true \ # Leave this set to true
+	--writers.pcd.compression="binary" \ # Can change to "ascii" if need be
+	-i $LASINPUT \ # Your input file
+	-o $DOWNSAMPLE_FILE \ # The output file
+	voxelgrid \ # Do the downsampling based on the LEAF_SIZE parameter
+	--filters.voxelgrid.leaf_x=$LEAF_SIZE \
+	--filters.voxelgrid.leaf_y=$LEAF_SIZE \
+	--filters.voxelgrid.leaf_z=$LEAF_SIZE
 
 
 ```
@@ -132,7 +147,7 @@ LEAF_SIZE="0.04"
 * **Mathias Disney**
 * **Kim Calders**
 * **Matheus Boni Vicari**
-* **With tweaks from: Jonathan Greenberg**
+* **With tweaks and additional documentation from: Jonathan Greenberg**
 
 
 ## License

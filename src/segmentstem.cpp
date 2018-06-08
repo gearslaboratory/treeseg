@@ -48,7 +48,9 @@ int main(int argc, char* argv[])
 		pcl::PointCloud<pcl::PointXYZ>::Ptr top(new pcl::PointCloud<pcl::PointXYZ>);
 		pcl::PointCloud<pcl::PointXYZ>::Ptr vnoground(new pcl::PointCloud<pcl::PointXYZ>);
 		pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
-		float zdelta = 0.25;
+		// This likely needs tweaking, seeing some issues with ground returns.
+		// float zdelta = 0.25; // region of the forest floor he is looking for, only 25 cm?
+		float zdelta = 0.25; // region of the forest floor he is looking for, only 25 cm?
 		Eigen::Vector4f min, max;
 		pcl::getMinMax3D(*volume,min,max);
 		spatial1DFilter(volume,"z",min[2],min[2]+zdelta,bottom);

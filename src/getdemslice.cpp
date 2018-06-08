@@ -3,24 +3,47 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
+#include "boost/program_options.hpp"
+#include <iostream>
+#include <string>
+
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/io/pcd_io.h>
 
 #include <treeseg.h>
 
+namespace
+{
+  const size_t ERROR_IN_COMMAND_LINE = 1;
+  const size_t SUCCESS = 0;
+  const size_t ERROR_UNHANDLED_EXCEPTION = 2;
+
+} // namespace
+
 int main (int argc, char *argv[])
 {
-	float resolution = atof(argv[1]);
-	float zmin = atof(argv[2]);
-	float zmax = atof(argv[3]);
+	// Trying to get command line args working:
+	namespace po = boost::program_options;
+	po::options_description desc("Options");
+	desc.add_options()
+		("help,h", "Print help messages")
+		("verbose,v", "Execute verbosely")
+		("downsample", po::value<std::string>()(&downsample)->required(), "downsample file!")
+		("resolution", po::value<std::float>()(&resolution)->required(), "resolution!")
+		("zmin", po::value<std::float>()(&zmin)->required(), "zmin!")
+		("zmax", po::value<std::float>()(&zmax)->required(), "zmax!")
+
+	// float resolution = atof(argv[1]);
+	// float zmin = atof(argv[2]);
+	// float zmax = atof(argv[3]);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr plotcloud(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PCDReader reader;
 	pcl::PCDWriter writer;
 	std::cout << "Reading plotcloud..." << std::endl;
-	reader.read(argv[4],*plotcloud);
+	reader.read(downsample,*plotcloud);
 	std::cout << "Finished reading plotcloud..." << std::endl;
-	std::vector<std::string> id = getFileID(argv[4]);
+	std::vector<std::string> id = getFileID(downsample);
 	std::stringstream ss;
 	ss.str("");
 	ss << id[1] << ".slice.downsample.pcd";
