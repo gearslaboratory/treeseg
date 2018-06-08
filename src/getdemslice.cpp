@@ -30,9 +30,24 @@ int main (int argc, char *argv[])
 		("help,h", "Print help messages")
 		("verbose,v", "Execute verbosely")
 		("downsample", po::value<std::string>()(&downsample)->required(), "downsample file!")
-		("resolution", po::value<std::float>()(&resolution)->required(), "resolution!")
-		("zmin", po::value<std::float>()(&zmin)->required(), "zmin!")
-		("zmax", po::value<std::float>()(&zmax)->required(), "zmax!")
+		("resolution", po::value<std::float>()(&resolution)->2, "resolution!")
+		("zmin", po::value<std::float>()(&zmin)->3, "zmin!")
+		("zmax", po::value<std::float>()(&zmax)->6, "zmax!");
+
+	po::positional_options_description positionalOptions;
+	    positionalOptions.add("resolution", 1);
+	    positionalOptions.add("zmin", 1);
+	    positionalOptions.add("zmax", 1);
+	    positionalOptions.add("downsample", 1);
+
+    po::variables_map vm;
+
+    po::store(po::command_line_parser(argc, argv).options(desc)
+                      .positional(positionalOptions).run(),
+                    vm);
+
+    // throws an error if something is wrong:
+    po::notify(vm);
 
 	// float resolution = atof(argv[1]);
 	// float zmin = atof(argv[2]);
