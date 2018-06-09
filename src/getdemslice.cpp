@@ -34,6 +34,7 @@ int main (int argc, char *argv[])
 		("zmin", po::value<std::float>()(&zmin)->3, "zmin!")
 		("zmax", po::value<std::float>()(&zmax)->6, "zmax!");
 
+	// Backwards compatibility (no named parameters)
 	po::positional_options_description positionalOptions;
 	    positionalOptions.add("resolution", 1);
 	    positionalOptions.add("zmin", 1);
